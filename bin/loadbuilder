@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('loadbuilder').cli(process.argv);
+require('../lib/loadbuilder').combine('js/widget.js')
