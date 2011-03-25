@@ -1,2 +1,41 @@
 #!/usr/bin/env node
-require('../lib/loadbuilder').combine('js/widget.js')
+
+var opts = require('opts');
+
+var options = [
+  {
+    short       : 'x',
+    long        : 'exclude',
+    description : 'Exclude scripts',
+    value       : true,
+  },
+  {
+    short       : 'nm',
+    long        : 'nomin',
+    description : 'Don\'t minify',
+  },
+  {
+    short       : 'p',
+    long        : 'path',
+    description : 'Module path',
+    value       : true,
+  },
+  {
+    short       : 'o',
+    long        : 'output',
+    description : 'Output file',
+    value       : true,
+  },
+];
+
+var arguments = [ { name : 'file' , required : true } ];
+
+opts.parse(options, arguments, true);
+
+var main = opts.arg('file');
+require('../lib/loadbuilder').combine(main, {
+  exclude   : opts.get('x').split(','),
+  output    : opts.get('o') || main.replace(/\.js$/,'')+'.lb.js',
+  path      : opts.get('p'),
+  nomin     : opts.get('nm'),
+});
