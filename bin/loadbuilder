@@ -34,8 +34,8 @@ var arguments = [ { name : 'file' , required : true } ];
 opts.parse(options, arguments, true);
 
 var main = opts.arg('file');
-require('../lib/loadbuilder').combine(main, {
+require('../lib/loadbuilder').config({
   exclude   : (opts.get('x') || '').split(','),
   path      : opts.get('p'),
   nomin     : opts.get('nm'),
-}).lint().minify().lint().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
+}).load(main).combine().minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
