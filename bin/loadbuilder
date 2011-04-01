@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-var opts = require('opts');
+var opts = require('opts'),
+    loadbuilder = require('../lib/loadbuilder');
 
 var options = [
   {
@@ -34,8 +35,11 @@ var arguments = [ { name : 'file' , required : true } ];
 opts.parse(options, arguments, true);
 
 var main = opts.arg('file');
-require('../lib/loadbuilder').config({
+
+var LB = loadbuilder.builder({
   exclude   : (opts.get('x') || '').split(','),
   path      : opts.get('p'),
   nomin     : opts.get('nm'),
-}).load(main).combine().minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
+});
+
+LB.load(main).combine().minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
