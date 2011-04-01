@@ -3,7 +3,6 @@
 var loadbuilder = require('loadbuilder');
 
 var phoenixBuilder = loadbuilder.builder({
-  matchers: [],
   nomin: true,
   follow: true,
   docRoot: 'test',
