@@ -17,12 +17,6 @@ var options = [
     description : 'Don\'t minify',
   },
   {
-    short       : 'd',
-    long        : 'docRoot',
-    description : 'Document root',
-    value       : true,
-  },
-  {
     short       : 'm',
     long        : 'modPath',
     description : 'Module path, relative to document root',
@@ -32,6 +26,12 @@ var options = [
     short       : 'o',
     long        : 'distRoot',
     description : 'Output root',
+    value       : true,
+  },
+  {
+    short       : 'd',
+    long        : 'docRoot',
+    description : 'Document root',
     value       : true,
   },
 ];

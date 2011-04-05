@@ -1,1 +1,0 @@
-window.testSeq.push(1);

@@ -1,3 +1,0 @@
-provide({
-  test: 'success'
-});
