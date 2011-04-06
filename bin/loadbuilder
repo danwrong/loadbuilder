@@ -5,6 +5,13 @@ var opts = require('opts'),
 
 var options = [
   {
+    short       : 'l',
+    long        : 'logLevel',
+    description : 'Log Level - 0:none, 1:errors, 2:info',
+    value       : true,
+    default     : 2,
+  },
+  {
     short       : 'x',
     long        : 'exclude',
     description : 'Exclude scripts',
@@ -48,9 +55,8 @@ var LB = loadbuilder.builder({
   distRoot  : opts.get('o') || process.cwd() + "/dist",
   modPath   : opts.get('m') || '',
   nomin     : opts.get('nm'),
-  logLevel  : 3
+  logLevel  : opts.get('l') || 3
 });
-
 LB.load(main)
   .minify()
   .save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
