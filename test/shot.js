@@ -4,7 +4,7 @@
   Requires expresso
   >  expresso shot.js
 
-  // TODO: check excludes,
+  // TODO: check excludes, bundle manifest, errors
 
 */
 
@@ -35,7 +35,8 @@ exports.testSimple = function(beforeExit){
   var testRunner = LoadBuilder.builder({
     docRoot: '.',
     distRoot: 'testdist',
-    modPath: 'modules'
+    modPath: 'modules',
+    logLevel: 3
   });
   var modCount = 0;
   // load mod1

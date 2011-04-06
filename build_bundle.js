@@ -5,19 +5,22 @@ var loadbuilder = require('loadbuilder');
 var phoenixBuilder = loadbuilder.builder({
   nomin: true,
   docRoot: 'test',
-  modPath: '/modules',
-  distRoot: 'test/dist'
+  modPath: 'modules',
+  distRoot: 'test/dist',
+  logLevel: 0
 });
 
-var cbundle = phoenixBuilder.bundle('modc');
+var cbundle = phoenixBuilder.bundle('mod2-multiple');
 
-var dbundle = phoenixBuilder.bundle('modd', {
+var dbundle = phoenixBuilder.bundle('mod1-simple', {
   exclude: [cbundle]
 });
 
-phoenixBuilder.bundle('modb', {
-  exclude: ['moda', cbundle, dbundle]
+phoenixBuilder.bundle('mod3-tree', {
+  exclude: ['mod3_b', cbundle, dbundle]
 });
 
+console.log('errors:', phoenixBuilder.getErrors());
 
-// ==> output inline script manifest
+console.log('manifest:', phoenixBuilder.getBundleManifest());
+

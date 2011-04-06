@@ -48,6 +48,9 @@ var LB = loadbuilder.builder({
   distRoot  : opts.get('o') || process.cwd() + "/dist",
   modPath   : opts.get('m') || '',
   nomin     : opts.get('nm'),
+  logLevel  : 3
 });
 
-LB.load(main).minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
+LB.load(main)
+  .minify()
+  .save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
