@@ -4,7 +4,6 @@ var loadbuilder = require('loadbuilder');
 
 var phoenixBuilder = loadbuilder.builder({
   nomin: true,
-  follow: true,
   docRoot: 'test',
   modPath: '/modules',
   distRoot: 'test/dist'

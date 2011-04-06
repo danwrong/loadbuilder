@@ -50,4 +50,4 @@ var LB = loadbuilder.builder({
   nomin     : opts.get('nm'),
 });
 
-LB.load(main).combine().minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
+LB.load(main).minify().save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');

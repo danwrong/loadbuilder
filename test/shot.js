@@ -4,7 +4,7 @@
   Requires expresso
   >  expresso shot.js
 
-  // TODO: check excludes, fix $scripts
+  // TODO: check excludes,
 
 */
 
@@ -41,20 +41,13 @@ exports.testSimple = function(beforeExit){
   // load mod1
   testRunner.load('mod1-simple');
   // check deps are loaded
-  var expected = ['mod1-simple', 'mod1_a', 'sub/mod1_b'];
-  testRunner.dependencies.module.forEach(function(mod){
+  var expected = ['sub/mod1_b', 'mod1_a', 'mod1-simple'];
+  testRunner.dependencies.forEach(function(mod){
     assert.equal(expected.shift(), mod.name);
     modCount++;
   });
-  // check load order is correct
-  var stack = LoadBuilder.Dependency.getCallStack(testRunner.dependencies);
-  expected = ['sub/mod1_b', 'mod1_a', 'mod1-simple'];
-  stack.forEach(function(item){
-    assert.equal(expected.shift(), item.name);
-    modCount++;
-  });
   beforeExit(function(){
-    assert.equal(6, modCount, 'All modules loaded.');
+    assert.equal(3, modCount, 'All modules loaded.');
   });
 
 };
@@ -70,20 +63,13 @@ exports.testMultiple = function(beforeExit){
   // load mod2
   testRunner.load('mod2-multiple');
   // check deps are loaded
-  var expected = ['mod2-multiple', 'mod2_a', 'mod2_b'];
-  testRunner.dependencies.module.forEach(function(mod){
+  var expected = ['mod2_b', 'mod2_a', 'mod2-multiple'];
+  testRunner.dependencies.forEach(function(mod){
     assert.equal(expected.shift(), mod.name);
     modCount++;
   });
-  // check load order is correct
-  var stack = LoadBuilder.Dependency.getCallStack(testRunner.dependencies);
-  expected = ['mod2_b', 'mod2_a', 'mod2-multiple'];
-  stack.forEach(function(item){
-    assert.equal(expected.shift(), item.name);
-    modCount++;
-  });
   beforeExit(function(){
-    assert.equal(6, modCount, 'All modules loaded.');
+    assert.equal(3, modCount, 'All modules loaded.');
   });
 
 };
@@ -99,9 +85,8 @@ exports.testTree = function(beforeExit){
   // load mod3
   testRunner.load('mod3-tree');
   // check load order is correct
-  var stack = LoadBuilder.Dependency.getCallStack(testRunner.dependencies);
   var expected = ['mod3_b', 'mod3_a', 'mod3_c', 'mod3-tree'];
-  stack.forEach(function(item){
+  testRunner.dependencies.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
@@ -122,9 +107,8 @@ exports.testScript = function(beforeExit){
   // load mod4
   testRunner.load('mod4-script');
   // check load order is correct
-  var stack = LoadBuilder.Dependency.getCallStack(testRunner.dependencies);
-  var expected = ['javascripts/script1.js', '$../javascripts/script2.js', 'mod4_a', 'mod4-script'];
-  stack.forEach(function(item){
+  var expected = ['$../javascripts/script2.js', 'javascripts/script1.js', 'mod4_a', 'mod4-script'];
+  testRunner.dependencies.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
@@ -142,7 +126,7 @@ exports.testBundle = function(beforeExit){
     modPath: 'modules'
   });
   var modCount = 0;
-  // load mod4
+  // load mod2
   testRunner.bundle('mod2-multiple');
   // check file exists
   fs.stat('testdist/modules/mod2-multiple.js', function(err, stats) {
@@ -152,9 +136,8 @@ exports.testBundle = function(beforeExit){
   });
 
   // check load order is correct
-  var stack = LoadBuilder.Dependency.getCallStack(testRunner.dependencies);
-  var expected = ['mod2-multiple', 'mod2_a', 'mod2_b'];
-  stack.forEach(function(item){
+  var expected = ['mod2_b', 'mod2_a', 'mod2-multiple'];
+  testRunner.dependencies.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
