@@ -12,6 +12,11 @@ var options = [
     default     : 2,
   },
   {
+    short       : 'h',
+    long        : 'hint',
+    description : 'Run JSHint to log (info)',
+  },
+  {
     short       : 'x',
     long        : 'exclude',
     description : 'Exclude scripts',
@@ -54,9 +59,13 @@ var LB = loadbuilder.builder({
   docRoot   : opts.get('d') || process.cwd(),
   distRoot  : opts.get('o') || process.cwd() + "/dist",
   modPath   : opts.get('m') || '',
-  nomin     : opts.get('nm'),
   logLevel  : opts.get('l') || 3
 });
-LB.load(main)
-  .minify()
-  .save(opts.get('o') || main.replace(/\.js$/,'')+'.lb.js');
+LB.load(main);
+if (opts.get('h')) {
+  LB.hint();
+}
+if (opts.get('nm')) {
+  LB.minify()
+}
+LB.save(opts.get('o') || main.replace(/\.js$/,'')+'.js');
