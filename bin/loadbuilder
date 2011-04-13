@@ -57,7 +57,7 @@ var main = opts.arg('file');
 var LB = loadbuilder.builder({
   exclude   : (opts.get('x') || '').split(','),
   docRoot   : opts.get('d') || process.cwd(),
-  distRoot  : opts.get('o') || process.cwd() + "/dist",
+  distRoot  : opts.get('o') || "STDOUT/",
   modPath   : opts.get('m') || '',
   logLevel  : opts.get('l') || 3
 });
@@ -68,4 +68,4 @@ if (opts.get('h')) {
 if (opts.get('nm')) {
   LB.minify()
 }
-LB.save(opts.get('o') || main.replace(/\.js$/,'')+'.js');
+LB.save(opts.get('o'));
