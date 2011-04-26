@@ -4,8 +4,8 @@
     "description": "Combine and compress dependency chains created by Loadrunner",
     "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }],
     "homepage": "https://github.com/danwrong/loadbuilder",
-    "directories" : { "lib" : "./lib" },
-    "main" : "./lib/loadbuilder",
+    "directories" : { "src" : "./src" },
+    "main" : "./src/loadbuilder",
     "engines": { "node": ">= 0.4.0" },
     "bin": {
       "loadbuilder": "./bin/loadbuilder"
