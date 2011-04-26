@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var opts = require('opts'),
-    loadbuilder = require('../lib/loadbuilder');
+    loadbuilder = require('../src/loadbuilder');
 
 var options = [
   {
@@ -65,7 +65,7 @@ LB.load(main);
 if (opts.get('h')) {
   LB.hint();
 }
-if (opts.get('nm')) {
+if (!opts.get('nm')) {
   LB.minify()
 }
-LB.save(opts.get('o'));
+LB.save(main);

@@ -45,8 +45,9 @@ function isProvide(node) {
 function excluded(item, loadbuilder) {
   var excluded = false;
   loadbuilder.options.exclude.forEach(function(excl) {
-    if (typeof(excl)=='string' && excl.name==item) {
+    if (typeof(excl)=='string' && excl==item) {
       excluded = true;
+      console.log('excluded!', excl, item)
       return;
     }
     if (typeof(excl)=='object') {
@@ -71,6 +72,7 @@ Dependency.prototype.parseSource = function() {
   this.ast = jsp.parse(this.source);
 };
 Dependency.prototype.getLicense = function() {
+  return '';
   var text = this.source.replace(/\n/g,' ');
   var matches = text.match(/^(\/\*\!.*\*\/)/);
   if (matches) return matches[1];
