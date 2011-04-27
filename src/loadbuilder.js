@@ -72,10 +72,9 @@ Dependency.prototype.parseSource = function() {
   this.ast = jsp.parse(this.source);
 };
 Dependency.prototype.getLicense = function() {
-  return '';
-  var text = this.source.replace(/\n/g,' ');
-  var matches = text.match(/^(\/\*\!.*\*\/)/);
-  if (matches) return matches[1];
+  var text = this.source.replace(/\n/g, '\\n');
+  var matches = text.match(/^(\/\*\!.*?\*\/)/);
+  if (matches) return matches[1].replace(/\\n/g, '\n');
   return '';
 };
 Dependency.prototype.hint = function(opts) {
@@ -149,8 +148,17 @@ function Script(name, loadbuilder) {
 }
 Script.matcher = /\.js$/;
 Script.prototype = new Dependency;
-Script.prototype.generateCode = function() {
-  return this.getLicense() + jspro.gen_code(this.ast) + ';loadrunner.Script.loaded.push("' + this.name + '")';
+Script.prototype.getCode = function(minify) {
+  var code = '';
+  if (minify) {
+    this.ast = jspro.ast_mangle(this.ast);
+    this.ast = jspro.ast_squeeze(this.ast);
+  }
+  code = jspro.gen_code(this.ast);
+  return this.getLicense() + code;
+};
+Script.prototype.generateCode = function(minify) {
+  return this.getCode(minify) + ';loadrunner.Script.loaded.push("' + this.name + '")';
 };
 Script.prototype.getFilename = function(name, modPath) {
   return name.replace(/^\$/, this.lb.options.modPath);
@@ -164,8 +172,8 @@ function Module(name, loadbuilder) {
 }
 Module.matcher = /^[a-zA-Z0-9_\-\/]+$/;
 Module.prototype = new Script;
-Module.prototype.generateCode = function() {
-  return this.getLicense() + jspro.gen_code(this.ast);
+Module.prototype.generateCode = function(minify) {
+  return this.getCode(minify);
 };
 Module.prototype.getFilename = function() {
   return this.name + '.js';
@@ -178,7 +186,8 @@ function LoadBuilder(options) {
     distRoot: 'STDOUT/',
     modPath: '/modules',
     logLevel: 1,  // log levels: 0:none, 1:error, 2:info
-    matchers: [Script, Module]
+    matchers: [Script, Module],
+    nomin: false
   };
   this.manifest = {};
   this._clean();
@@ -228,28 +237,29 @@ LoadBuilder.prototype = {
   },
   _generate: function() {
     var outputCode = [];
+    var minify = !this.options.nomin;
     this.dependencies.forEach(function(item) {
-      outputCode.push(item.generateCode());
+      outputCode.push(item.generateCode(minify));
     });
     return outputCode.join(';');
   },
   minify: function() {
-    this.code = this._generate();
-    var bigSize = this.code.length;
-    var smallSize = 0;
-    var minifiedAST = jsp.parse(this.code);
-    minifiedAST = jspro.ast_mangle(minifiedAST);
-    minifiedAST = jspro.ast_squeeze(minifiedAST);
-    this.code = jspro.gen_code(minifiedAST);
-    var licenses = [];
-    this.dependencies.forEach(function(dep) {
-      var license = dep.getLicense()
-      if (license) licenses.push(dep.getLicense());
-    });
-    this.code = licenses.join(' ') + this.code;
-    smallSize = this.code.length;
-    this.log(2, 'Minified from ' + bigSize + ' to ' + smallSize + ' bytes', []);
-    return this;
+    // this.code = this._generate();
+    // var bigSize = this.code.length;
+    // var smallSize = 0;
+    // var minifiedAST = jsp.parse(this.code);
+    // minifiedAST = jspro.ast_mangle(minifiedAST);
+    // minifiedAST = jspro.ast_squeeze(minifiedAST);
+    // this.code = jspro.gen_code(minifiedAST);
+    // var licenses = [];
+    // this.dependencies.forEach(function(dep) {
+    //   var license = dep.getLicense()
+    //   if (license) licenses.push(dep.getLicense());
+    // });
+    // this.code = licenses.join(' ') + this.code;
+    // smallSize = this.code.length;
+    // this.log(2, 'Minified from ' + bigSize + ' to ' + smallSize + ' bytes', []);
+    // return this;
   },
   save: function(outputFilename) {
     if (!this.code) this.code = this._generate();
@@ -272,9 +282,9 @@ LoadBuilder.prototype = {
     this.load(name);
     var filename = name;
     if (!name.match(/\.js$/)) {
-      filename = this.options.modPath + name + '.js';  // TODO: FIXME
+      filename = this.options.modPath + name + '.js';  // TODO: This is a poor detection for Modules
     }
-    this.minify().save(filename);
+    this.save(filename.replace(/\$/, this.options.modPath));
 
     // return the dep names for use in the exclusion param of future bundles
     var loadedDeps = [];
