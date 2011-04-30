@@ -243,28 +243,33 @@ LoadBuilder.prototype = {
     });
     return outputCode.join(';');
   },
-  minify: function() {
-    // this.code = this._generate();
-    // var bigSize = this.code.length;
-    // var smallSize = 0;
-    // var minifiedAST = jsp.parse(this.code);
-    // minifiedAST = jspro.ast_mangle(minifiedAST);
-    // minifiedAST = jspro.ast_squeeze(minifiedAST);
-    // this.code = jspro.gen_code(minifiedAST);
-    // var licenses = [];
-    // this.dependencies.forEach(function(dep) {
-    //   var license = dep.getLicense()
-    //   if (license) licenses.push(dep.getLicense());
-    // });
-    // this.code = licenses.join(' ') + this.code;
-    // smallSize = this.code.length;
-    // this.log(2, 'Minified from ' + bigSize + ' to ' + smallSize + ' bytes', []);
-    // return this;
+  namespace: function() {
+    this.code = this.options.namespace + "(function(using, provide, loadrunner, define) {" +
+                this.code + '});';
   },
+  addLoadrunner: function() {
+    var lr = fs.readFileSync(this.options.standAlone);
+
+    if (typeof this.options.namespace == 'string' && this.options.namespace.length > 0) {
+      lr += "window." + this.options.namespace + " = loadrunner.noConflict();"
+    }
+
+    this.code = lr + this.code;
+  }
   save: function(outputFilename) {
     if (!this.code) this.code = this._generate();
+
+    if (typeof this.options.namespace == 'string' && this.options.namespace.length > 0) {
+      this.namespace();
+    }
+
+    if (typeof this.options.standAlone == 'string' && this.options.standAlone.length > 0) {
+      this.addLoadrunner();
+    }
+
     var outputFile = this.options.distRoot + outputFilename;
     var outputCode = this.code;
+
     if (this.options.distRoot == 'STDOUT/') {
       console.log(outputCode);
     } else {
