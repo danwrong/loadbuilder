@@ -255,7 +255,7 @@ LoadBuilder.prototype = {
     }
 
     this.code = lr + this.code;
-  }
+  },
   save: function(outputFilename) {
     if (!this.code) this.code = this._generate();
 
