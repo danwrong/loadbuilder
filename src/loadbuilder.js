@@ -66,7 +66,7 @@ function excluded(item, loadbuilder) {
 function Dependency() {
 }
 Dependency.prototype.fetchSource = function() {
-  this.source = fs.readFileSync(this.lb.options.docRoot + this.filename, 'utf-8');
+  this.source = fs.readFileSync(this.lb.options.docRoot + this.filename, 'utf8');
 };
 Dependency.prototype.parseSource = function() {
   this.ast = jsp.parse(this.source);
@@ -248,14 +248,22 @@ LoadBuilder.prototype = {
                 this.code + '});';
   },
   addLoadrunner: function() {
-    var lr = fs.readFileSync(this.options.standAlone);
+    var lr = fs.readFileSync(this.options.standAlone, 'utf8');
 
-    if (typeof this.options.namespace == 'string' && this.options.namespace.length > 0) {
-      lr += "window." + this.options.namespace + " = loadrunner.noConflict();"
+    if (!this.options.nomin) {
+      var ast = jsp.parse(lr);
+          ast = jspro.ast_mangle(ast);
+          ast = jspro.ast_squeeze(ast);
+
+      lr = jspro.gen_code(ast);
     }
 
+     if (typeof this.options.namespace == 'string' && this.options.namespace.length > 0) {
+        lr += ";window." + this.options.namespace + " = loadrunner.noConflict();"
+      }
+
     this.code = lr + this.code;
-  }
+  },
   save: function(outputFilename) {
     if (!this.code) this.code = this._generate();
 
