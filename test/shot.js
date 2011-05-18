@@ -108,7 +108,7 @@ exports.testScript = function(beforeExit){
   // load mod4
   testRunner.load('mod4-script');
   // check load order is correct
-  var expected = ['$../javascripts/script2.js', 'javascripts/script1.js', 'mod4_a', 'mod4-script'];
+  var expected = ['$../javascripts/script2.js', 'mod4_a', 'javascripts/script1.js', 'mod4-script'];
   testRunner.dependencies.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
