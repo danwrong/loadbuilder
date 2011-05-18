@@ -59,13 +59,11 @@ var LB = loadbuilder.builder({
   docRoot   : opts.get('d') || process.cwd(),
   distRoot  : opts.get('o') || "STDOUT/",
   modPath   : opts.get('m') || '',
-  logLevel  : opts.get('l') || 3
+  logLevel  : opts.get('l') || 3,
+  nomin     : !!opts.get('nm')
 });
 LB.load(main);
 if (opts.get('h')) {
   LB.hint();
-}
-if (!opts.get('nm')) {
-  LB.minify()
 }
 LB.save(main);
