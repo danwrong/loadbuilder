@@ -25,21 +25,20 @@ function indent(depth) {
 }
 
 function extractDeps(argList) {
-  return argList.map(function(item) {
-    if (item[0] == 'string') {
-      return item[1];
-    }
-  }).filter(  function(item) {
-    return !(typeof item == 'undefined' || item == null);
+  var depList = [];
+  argList.forEach(function(item) {
+    if (item[0] == 'string') depList.push(item[1]);
+    else if (item[0] == 'array') depList = depList.concat(extractDeps(item[1]));
   });
+  return depList;
 }
 
 function isUsing(node) {
-  return node[0] == 'call' && node[1][1] == 'using';
+  return node[0] == 'call' && node[1] && node[1][1] == 'using';
 }
 
 function isProvide(node) {
-  return node[0] == 'call' && node[1][1] == 'provide';
+  return node[0] == 'call' && node[1] && node[1][1] == 'provide';
 }
 
 function excluded(item, loadbuilder) {

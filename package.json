@@ -2,7 +2,7 @@
     "name": "loadbuilder",
     "version": "0.1.0",
     "description": "Combine and compress dependency chains created by Loadrunner",
-    "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }],
+    "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }, { "name": "Kenneth Kufluk", "email": "kenneth@kufluk.com" }],
     "homepage": "https://github.com/danwrong/loadbuilder",
     "directories" : { "src" : "./src" },
     "main" : "./src/loadbuilder",
@@ -11,6 +11,7 @@
       "loadbuilder": "./bin/loadbuilder"
     },
     "dependencies": {
+      "jshint": ">=0",
       "opts": ">=1.2.1",
       "uglify-js": ">=0.0.5",
       "colors": ">=0.5.0"

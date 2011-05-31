@@ -147,3 +147,26 @@ exports.testBundle = function(beforeExit){
   });
 
 };
+// sequence test
+exports.testSequence = function(beforeExit){
+
+  var testRunner = LoadBuilder.builder({
+    docRoot: '.',
+    distRoot: 'testdist',
+    modPath: 'modules'
+  });
+  var modCount = 0;
+  // load mod2
+  testRunner.load('mod6-sequence');
+  // check deps are loaded
+  var expected = ['mod2_b', 'mod2_a', 'mod6-sequence'];
+  testRunner.dependencies.forEach(function(mod){
+    console.log(mod.name)
+    assert.equal(expected.shift(), mod.name);
+    modCount++;
+  });
+  beforeExit(function(){
+    assert.equal(3, modCount, 'All modules loaded.');
+  });
+
+};
