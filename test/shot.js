@@ -43,7 +43,7 @@ exports.testSimple = function(beforeExit){
   testRunner.load('mod1-simple');
   // check deps are loaded
   var expected = ['sub/mod1_b', 'mod1_a', 'mod1-simple'];
-  testRunner.dependencies.forEach(function(mod){
+  testRunner.dependencies.deps.forEach(function(mod){
     assert.equal(expected.shift(), mod.name);
     modCount++;
   });
@@ -65,7 +65,7 @@ exports.testMultiple = function(beforeExit){
   testRunner.load('mod2-multiple');
   // check deps are loaded
   var expected = ['mod2_b', 'mod2_a', 'mod2-multiple'];
-  testRunner.dependencies.forEach(function(mod){
+  testRunner.dependencies.deps.forEach(function(mod){
     assert.equal(expected.shift(), mod.name);
     modCount++;
   });
@@ -87,7 +87,7 @@ exports.testTree = function(beforeExit){
   testRunner.load('mod3-tree');
   // check load order is correct
   var expected = ['mod3_b', 'mod3_a', 'mod3_c', 'mod3-tree'];
-  testRunner.dependencies.forEach(function(item){
+  testRunner.dependencies.deps.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
@@ -109,7 +109,7 @@ exports.testScript = function(beforeExit){
   testRunner.load('mod4-script');
   // check load order is correct
   var expected = ['$../javascripts/script2.js', 'mod4_a', 'javascripts/script1.js', 'mod4-script'];
-  testRunner.dependencies.forEach(function(item){
+  testRunner.dependencies.deps.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
@@ -138,7 +138,7 @@ exports.testBundle = function(beforeExit){
 
   // check load order is correct
   var expected = ['mod2_b', 'mod2_a', 'mod2-multiple'];
-  testRunner.dependencies.forEach(function(item){
+  testRunner.dependencies.deps.forEach(function(item){
     assert.equal(expected.shift(), item.name);
     modCount++;
   });
@@ -160,8 +160,7 @@ exports.testSequence = function(beforeExit){
   testRunner.load('mod6-sequence');
   // check deps are loaded
   var expected = ['mod2_b', 'mod2_a', 'mod6-sequence'];
-  testRunner.dependencies.forEach(function(mod){
-    console.log(mod.name)
+  testRunner.dependencies.deps.forEach(function(mod){
     assert.equal(expected.shift(), mod.name);
     modCount++;
   });
