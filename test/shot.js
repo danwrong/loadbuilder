@@ -12,7 +12,7 @@ var assert = require('assert'),
     fs = require('fs');
 
 // require loadbuilder
-var LoadBuilder = require('loadbuilder');
+var LoadBuilder = require('../src/loadbuilder');
 
 // check the configs are correctly set
 exports.testConfig = function(beforeExit){

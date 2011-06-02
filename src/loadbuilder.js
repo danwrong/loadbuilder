@@ -1,6 +1,6 @@
 var fs     = require('fs'),
     sys    = require('sys'),
-    exec   = require('child_process').exec,
+    mkdir  = require('./util/mkdirSync'),
     jsp    = require('uglify-js').parser,
     jspro  = require("uglify-js").uglify,
     opts   = require('opts'),
@@ -14,10 +14,6 @@ function mixin(target, source) {
   });
 
   return target;
-}
-
-function mkdir(dir, f) {
-  exec("mkdir -p " + dir, f);
 }
 
 function indent(depth) {
@@ -281,9 +277,8 @@ LoadBuilder.prototype = {
       console.log(outputCode);
     } else {
       this.log(2, 'Output file', [ outputFile ]);
-      mkdir(outputFile.replace(/[^\/]+$/, ''), function() {
-        fs.writeFileSync(outputFile, outputCode);
-      });
+      mkdir(outputFile.replace(/[^\/]+$/, ''));
+      fs.writeFileSync(outputFile, outputCode);
     }
     return this;
   },
