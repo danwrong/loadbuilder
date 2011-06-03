@@ -81,7 +81,7 @@ function Script(name, loadbuilder) {
     this.filename = this.getFilename(this.lb.options.modPath);
     this.license = '';
     this.preCode = 'provide("' + name + '", function(exports) {';
-    this.postCode = '})';
+    this.postCode = ';exports();loadrunner.Script.loaded.push("' + name + '")})';
     this.type = 'script';
   }
 }
@@ -296,9 +296,12 @@ LoadBuilder.prototype = {
   // Bundle a module
   bundle: function(name, bundleOpts) {
     this.clean();
-    if (!!bundleOpts) this.config(bundleOpts);
-
-    this.load(name);
+    var files = name;
+    if (!!bundleOpts) {
+      this.config(bundleOpts);
+      if (bundleOpts.files) files = bundleOpts.files;
+    }
+    this.load(files);
     var filename = name;
     if (!name.match(/\.js$/)) {
       filename = this.options.modPath + name + '.js';  // TODO: This is a poor detection for Modules
