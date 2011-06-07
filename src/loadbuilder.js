@@ -74,7 +74,7 @@ DependencyChain.prototype.add = function(dep) {
  this.deps.unshift(dep);
 }
 
-function Script(name, loadbuilder) {
+function Script(name, loadbuilder, depth) {
   if (name) {
     this.name = name;
     this.lb = loadbuilder;
@@ -83,6 +83,11 @@ function Script(name, loadbuilder) {
     this.preCode = 'provide("' + name + '", function(exports) {';
     this.postCode = ';exports();loadrunner.Script.loaded.push("' + name + '")})';
     this.type = 'script';
+  }
+
+  if (depth === 0) {
+    this.preCode = '';
+    this.postCode = '';
   }
 }
 Script.matcher = /\.js$/;
@@ -220,7 +225,7 @@ LoadBuilder.prototype = {
   _loadFile: function(name, depth) {
     for (var index in this.options.matchers) {
       if (name.match(this.options.matchers[index].matcher)) {
-        var file = new this.options.matchers[index](name, this);
+        var file = new this.options.matchers[index](name, this, depth);
         file.traceDependencies(depth);
         return;
       }
