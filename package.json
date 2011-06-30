@@ -11,6 +11,7 @@
       "loadbuilder": "./bin/loadbuilder"
     },
     "dependencies": {
+      "npm": ">= 1.0.0",
       "jshint": ">=0",
       "opts": ">=1.2.1",
       "uglify-js": ">=0.0.5",
