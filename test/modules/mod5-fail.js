@@ -1,1 +1,0 @@
-penguins are cool;
