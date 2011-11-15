@@ -46,7 +46,7 @@ util.extend(Script.prototype, {
       this._source = fs.readFileSync(this.fullPath(), 'utf8');
     }
 
-    return this._source;
+    return this.deferWrapper(this._source);
   },
   fullPath: function() {
     return this.builder.path(this.id);
@@ -59,6 +59,10 @@ util.extend(Script.prototype, {
       console.log(e.reason + ' line: ' + e.line +
                   ', col: ' + e.character + '\n');
     });
+  },
+  deferWrapper: function(source) {
+    return this.builder.options.useDeferred === true ? "deferred('" +
+           this.id + "', function() {\n" + source + "\n});" : source;
   }
 });
 
