@@ -1,0 +1,1 @@
+using('fixtures/dep1.js', 'fixtures/dep2.js');

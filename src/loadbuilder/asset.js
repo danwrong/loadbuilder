@@ -1,14 +1,37 @@
-var util = require('./util'),
-    fs   = require('fs'),
-    path = require('path'),
-    jshint = require('jshint').JSHINT,
-    uglify = require("uglify-js");
+var util     = require('./util'),
+    analyzer = require('./analyzer'),
+    fs       = require('fs'),
+    path     = require('path'),
+    jshint   = require('jshint').JSHINT;
+
+var USING_MATCHER     = [ 'call', [ 'name', 'using' ], null ];
+var USING_ARG_MATCHER = [ 'string', null ];
 
 function Script(id) {
   this.id = id;
 }
 
 util.extend(Script.prototype, {
+  dependencies: function() {
+    var usings, dependencies = [];
+
+    if (!this._dependencies) {
+      usings = analyzer.analyze(USING_MATCHER, this.toSource());
+
+      usings.forEach(function(call) {
+        var args = analyzer.analyze(USING_ARG_MATCHER, call.values);
+
+        args.forEach(function(arg) {
+           var dep = this.builder.matchAsset(arg.values[0]);
+           dependencies = dependencies.concat(dep.dependencies()).concat(dep);
+        }, this);
+      }, this);
+
+      this._dependencies = dependencies;
+    }
+
+    return this._dependencies;
+  },
   lint: function(options) {
     var lintOptions = util.extend({}, this.builder.options.lint || {});
     util.extend(lintOptions, options || {});
@@ -19,7 +42,11 @@ util.extend(Script.prototype, {
     }
   },
   toSource: function() {
-    return fs.readFileSync(this.fullPath(), 'utf8');
+    if (!this._source) {
+      this._source = fs.readFileSync(this.fullPath(), 'utf8');
+    }
+
+    return this._source;
   },
   fullPath: function() {
     return this.builder.path(this.id);
@@ -35,66 +62,6 @@ util.extend(Script.prototype, {
   }
 });
 
-function Collection(builder, assets) {
-  this.builder = builder;
-  this.assets = assets;
-}
-
-util.extend(Collection.prototype, {
-  lint: function(options) {
-    this.dedupedAssets().forEach(function(a) {
-      a.lint(options);
-    });
-
-    return this;
-  },
-  minify: function(options) {
-    if (options === false) {
-      this.minifyOptions = null;
-    } else {
-      this.minifyOptions = (typeof options == 'object') ? options : {};
-    }
-
-    return this;
-  },
-  toSource: function() {
-    var ast, source = this.dedupedAssets().map(function(a) {
-      return a.toSource();
-    }).join('\n');
-
-    if (this.minifyOptions) {
-      ast = uglify.parser.parse(source);
-      ast = uglify.uglify.ast_mangle(ast);
-      ast = uglify.uglify.ast_squeeze(ast);
-      source = uglify.uglify.gen_code(ast);
-    }
-
-    return source;
-  },
-
-  write: function(path, success) {
-    return fs.writeFile(
-      path, this.toSource(),
-      'utf8', success || function() {}
-    );
-  },
-  dedupedAssets: function() {
-    var i, ii, elem, seen = {},
-        result = [], assets = this.assets;
-
-    for (i = 0, ii = assets.length; i < ii; i++) {
-      elem = assets[i];
-      if (!seen[elem.id]) {
-        seen[elem.id] = true;
-        result.push(elem);
-      }
-    }
-    return result;
-  }
-});
-
-
 module.exports = {
-  Collection: Collection,
   Script: Script
 };

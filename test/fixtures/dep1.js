@@ -1,0 +1,1 @@
+using('fixtures/dep1dep.js');

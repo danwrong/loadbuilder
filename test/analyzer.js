@@ -32,6 +32,12 @@ module.exports = {
     assert.eql(match, [1, 3]);
   },
 
+  testMatchShouldMatchArraysWithWildcard: function() {
+
+    match = analyzer.match([1, 2, null], tree);
+    assert.eql(match, [[3]]);
+  },
+
   testWalkShouldReturnArrayOfMatches: function() {
     matches = analyzer.walk([4], tree);
     assert.eql(matches, [

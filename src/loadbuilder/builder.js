@@ -1,21 +1,44 @@
-var util = require('./util'),
-    asset = require('./asset'),
-    path = require('path');
+var util   = require('./util'),
+    asset  = require('./asset'),
+    path   = require('path'),
+    fs     = require('fs'),
+    uglify = require("uglify-js");;
 
-function builder(options) {
-  return new Builder(options);
+function collect(excluded, assets) {
+  var collected = [];
+
+  assets.forEach(function(asset) {
+    if (excluded.indexOf(asset.id) < 0) {
+      collected = collected.concat(
+        collect(excluded, asset.dependencies())
+      ).concat(asset);
+    }
+  });
+
+  return collected;
 }
 
-builder.matchers = [];
+function dedupe(assets) {
+  var i, ii, elem, seen = {},
+      result = [];
 
-builder.matchers.add = function(regex, factory) {
-  this.unshift([regex, factory]);
+  for (i = 0, ii = assets.length; i < ii; i++) {
+    elem = assets[i];
+    if (!seen[elem.id]) {
+      seen[elem.id] = true;
+      result.push(elem);
+    }
+  }
+
+  return result;
 }
 
 function Builder(options) {
   this.options = {};
   util.extend(this.options, Builder.default_options);
   util.extend(this.options, options || {});
+  this.assets = [];
+  this.excludes = [];
 }
 
 Builder.default_options = {
@@ -24,9 +47,15 @@ Builder.default_options = {
 };
 
 util.extend(Builder.prototype, {
-  build: function(ids) {
-    var assets = this.mapAssets(arguments);
-    return new asset.Collection(this, assets);
+  include: function(ids) {
+    this.assets = this.mapAssets(arguments);
+
+    return this;
+  },
+  exclude: function() {
+    this.excludes = this.excludes.concat([].slice.call(arguments));
+
+    return this;
   },
   path: function(id) {
     return path.join(this.options.docroot, id);
@@ -55,9 +84,66 @@ util.extend(Builder.prototype, {
     }
 
     return mapped;
-  }
+  },
+  lint: function(options) {
+    this.collectedAssets().forEach(function(a) {
+      a.lint(options);
+    });
 
+    return this;
+  },
+  minify: function(options) {
+    if (options === false) {
+      this.minifyOptions = null;
+    } else {
+      this.minifyOptions = (typeof options == 'object') ? options : {};
+    }
+
+    return this;
+  },
+  minifySource: function(source) {
+    var ast, opts = util.extend({}, this.options.minify || {});
+    util.extend(opts, this.minifyOptions);
+
+    ast = uglify.parser.parse(source);
+    ast = uglify.uglify.ast_mangle(ast, opts);
+    ast = uglify.uglify.ast_squeeze(ast, opts);
+
+    return uglify.uglify.gen_code(ast, opts);
+  },
+  toSource: function() {
+    var source = this.collectedAssets().map(function(a) {
+      return a.toSource();
+    }).join('\n');
+
+    if (this.minifyOptions) {
+      source = this.minifySource(source);
+    }
+
+    return source;
+  },
+  write: function(path, success) {
+    fs.writeFile(
+      path, this.toSource(),
+      'utf8', success || function() {}
+    );
+
+    return this;
+  },
+  collectedAssets: function() {
+    return dedupe(collect(this.excludes, this.assets));
+  }
 });
+
+function builder(options) {
+  return new Builder(options);
+}
+
+builder.matchers = [];
+
+builder.matchers.add = function(regex, factory) {
+  this.unshift([regex, factory]);
+}
 
 builder.matchers.add(/./, function(id) {
   return new asset.Script(id);
