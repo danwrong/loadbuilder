@@ -23,7 +23,7 @@ util.extend(Script.prototype, {
 
         args.forEach(function(arg) {
            var dep = this.builder.matchAsset(arg.values[0]);
-           dependencies = dependencies.concat(dep.dependencies()).concat(dep);
+           dependencies = dependencies.concat(dep);
         }, this);
       }, this);
 
