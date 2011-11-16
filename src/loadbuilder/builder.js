@@ -2,7 +2,7 @@ var util   = require('./util'),
     asset  = require('./asset'),
     path   = require('path'),
     fs     = require('fs'),
-    uglify = require("uglify-js");;
+    uglify = require("uglify-js");
 
 function collect(excluded, assets) {
   var collected = [];
@@ -52,8 +52,16 @@ util.extend(Builder.prototype, {
 
     return this;
   },
-  exclude: function() {
-    this.excludes = this.excludes.concat([].slice.call(arguments));
+  exclude: function(ex) {
+    var excludes;
+
+    if (ex.assets) {
+      excludes = ex.assets.map(function(dep) { return dep.id });
+    } else {
+      excludes = [].slice.call(arguments);
+    }
+
+    this.excludes = this.excludes.concat(excludes);
 
     return this;
   },

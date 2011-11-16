@@ -2,10 +2,12 @@ var util     = require('./util'),
     analyzer = require('./analyzer'),
     fs       = require('fs'),
     path     = require('path'),
-    jshint   = require('jshint').JSHINT;
+    jshint   = require('jshint').JSHINT,
+    uglify   = require("uglify-js");
 
-var USING_MATCHER     = [ 'call', [ 'name', 'using' ], null ];
-var USING_ARG_MATCHER = [ 'string', null ];
+var USING      = [ 'call', [ 'name', 'using' ], null ];
+var STRING_ARG = [ 'string', null ];
+var PROVIDE    = [ 'call', [ 'name', 'provide' ], null ];
 
 function Script(id) {
   this.id = id;
@@ -16,14 +18,18 @@ util.extend(Script.prototype, {
     var usings, dependencies = [];
 
     if (!this._dependencies) {
-      usings = analyzer.analyze(USING_MATCHER, this.toSource());
+      usings = analyzer.analyze(USING, this.toSource());
 
       usings.forEach(function(call) {
-        var args = analyzer.analyze(USING_ARG_MATCHER, call.values);
+        var args = call.values[0];
 
         args.forEach(function(arg) {
-           var dep = this.builder.matchAsset(arg.values[0]);
-           dependencies = dependencies.concat(dep);
+          var dep, m;
+
+          if (m = analyzer.match(STRING_ARG, arg)) {
+             dep = this.builder.matchAsset(m[0]);
+             dependencies = dependencies.concat(dep);
+          }
         }, this);
       }, this);
 
@@ -43,10 +49,17 @@ util.extend(Script.prototype, {
   },
   toSource: function() {
     if (!this._source) {
-      this._source = fs.readFileSync(this.fullPath(), 'utf8');
+      this._source = this.fromFile();
     }
 
     return this.deferWrapper(this._source);
+  },
+  fromFile: function() {
+    if (!this._fromFile) {
+      this._fromFile = fs.readFileSync(this.fullPath(), 'utf8');
+    }
+
+    return this._fromFile;
   },
   fullPath: function() {
     return this.builder.path(this.id);
@@ -66,6 +79,49 @@ util.extend(Script.prototype, {
   }
 });
 
+function Module(id) {
+  this.id = id;
+}
+
+Module.prototype = new Script;
+
+util.extend(Module.prototype, {
+  fullPath: function() {
+    var modPath = [
+      this.builder.options.path.replace(/\/$/, ''),
+      '/',
+      this.id,
+      '.js'
+    ].join('');
+
+    return modPath;
+  },
+  toSource: function() {
+    if (!this._source) {
+      this._source = this.addId(fs.readFileSync(this.fullPath(), 'utf8'));
+    }
+
+    return this._source;
+  },
+  addId: function() {
+    var tree = uglify.parser.parse(this.fromFile()),
+        provides = analyzer.analyze(PROVIDE, tree),
+        provide;
+
+    if (provides.length == 1) {
+      provide = provides[0];
+
+       // TODO make this nice - maybe have a transform function?
+      if (analyzer.match(STRING_ARG, provide.values[0][0]) == null) {
+        provide.parent[provide.index][2].unshift(['string', this.id]);
+      }
+    }
+
+    return uglify.uglify.gen_code(tree, { beautify: true });
+  }
+});
+
 module.exports = {
-  Script: Script
+  Script: Script,
+  Module: Module
 };
