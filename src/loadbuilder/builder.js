@@ -107,8 +107,6 @@ util.extend(Builder.prototype, {
     return this;
   },
   minify: function(options) {
-    this.log('Minifying');
-
     if (options === false) {
       this.minifyOptions = null;
     } else {
@@ -118,6 +116,8 @@ util.extend(Builder.prototype, {
     return this;
   },
   minifySource: function(source) {
+    this.log('- Minifying bundle');
+
     var ast, opts = util.extend({}, this.options.minify || {});
     util.extend(opts, this.minifyOptions);
 

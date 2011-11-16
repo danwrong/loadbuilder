@@ -9,15 +9,18 @@ var USING      = [ 'call', [ 'name', 'using' ], null ];
 var STRING_ARG = [ 'string', null ];
 var PROVIDE    = [ 'call', [ 'name', 'provide' ], null ];
 
+var dependencyCache = {};
+
 function Script(id) {
   this.id = id;
 }
 
 util.extend(Script.prototype, {
   dependencies: function() {
+
     var usings, dependencies = [];
 
-    if (!this._dependencies) {
+    if (!dependencyCache[this.id]) {
       usings = analyzer.analyze(USING, this.toSource());
 
       usings.forEach(function(call) {
@@ -33,10 +36,10 @@ util.extend(Script.prototype, {
         }, this);
       }, this);
 
-      this._dependencies = dependencies;
+      dependencyCache[this.id] = dependencies;
     }
 
-    return this._dependencies;
+    return dependencyCache[this.id];
   },
   lint: function(options) {
     var lintOptions = util.extend({}, this.builder.options.lint || {});
