@@ -65,8 +65,14 @@ util.extend(Builder.prototype, {
 
     return this;
   },
+  log: function(message, level) {
+    console.log(message);
+  },
   path: function(id) {
     return path.join(this.options.docroot, id);
+  },
+  modPath: function(id) {
+    return path.join(this.options.path, id);
   },
   matchAsset: function(id) {
     var m, dep, asset;
@@ -101,6 +107,8 @@ util.extend(Builder.prototype, {
     return this;
   },
   minify: function(options) {
+    this.log('Minifying');
+
     if (options === false) {
       this.minifyOptions = null;
     } else {
@@ -121,8 +129,9 @@ util.extend(Builder.prototype, {
   },
   toSource: function() {
     var source = this.collectedAssets().map(function(a) {
+      this.log('* ' + a.id);
       return a.toSource();
-    }).join('\n');
+    }, this).join('\n');
 
     if (this.minifyOptions) {
       source = this.minifySource(source);
@@ -131,10 +140,13 @@ util.extend(Builder.prototype, {
     return source;
   },
   write: function(path, success) {
+
     fs.writeFile(
       path, this.toSource(),
       'utf8', success || function() {}
     );
+
+    this.log('> ' + path);
 
     return this;
   },
@@ -153,7 +165,11 @@ builder.matchers.add = function(regex, factory) {
   this.unshift([regex, factory]);
 }
 
-builder.matchers.add(/./, function(id) {
+builder.matchers.add(/^[a-zA-Z0-9_\-\/]+$/, function(id) {
+  return new asset.Module(id);
+})
+
+builder.matchers.add(/.js$/, function(id) {
   return new asset.Script(id);
 })
 

@@ -15,7 +15,7 @@ function match(fragment, tree) {
       return true;
     }
 
-    if (Array.isArray(tree[i]) && (subMatches = match(item, tree[i]))) {
+    if (Array.isArray(tree[i]) && Array.isArray(item) && (subMatches = match(item, tree[i]))) {
       matches = matches.concat(subMatches);
       return true;
     }

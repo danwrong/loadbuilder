@@ -42,7 +42,7 @@ util.extend(Script.prototype, {
     var lintOptions = util.extend({}, this.builder.options.lint || {});
     util.extend(lintOptions, options || {});
 
-    if (!jshint(this.toSource(), lintOptions)) {
+    if (!jshint(this.fromFile(), lintOptions)) {
       this.report(jshint.errors);
       process.exit(1);
     }
@@ -62,7 +62,11 @@ util.extend(Script.prototype, {
     return this._fromFile;
   },
   fullPath: function() {
-    return this.builder.path(this.id);
+    if (this.id.match(/^\$/)) {
+      return this.builder.modPath(this.id.replace(/^\$/, ''));
+    } else {
+      return this.builder.path(this.id);
+    }
   },
   report: function(errors) {
     console.log('Errors in ' + this.fullPath() + ':\n');
@@ -87,14 +91,7 @@ Module.prototype = new Script;
 
 util.extend(Module.prototype, {
   fullPath: function() {
-    var modPath = [
-      this.builder.options.path.replace(/\/$/, ''),
-      '/',
-      this.id,
-      '.js'
-    ].join('');
-
-    return modPath;
+    return this.builder.modPath(this.id + '.js');
   },
   toSource: function() {
     if (!this._source) {
