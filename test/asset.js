@@ -70,6 +70,7 @@ module.exports = {
       path: __dirname + '/modules'
     });
 
-    assert.equal('(function() {\nvar module=define("common",["require","anon"],function(require) {\nvar a = require("anon");\n});\n})();', a.toSource());
+    assert.equal('(function() {\nvar module=define("common",["require","anon"],' +
+                 'function(require) {\nvar a = require("anon");\n});\n})();', a.toSource());
   }
 }
