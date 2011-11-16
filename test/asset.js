@@ -53,6 +53,15 @@ module.exports = {
 
     assert.equal('anon', a.dependencies()[0].id);
   },
+  testShouldFindDependenciesForCommonJSModule: function() {
+    var a = new asset.CommonJSModule('common');
+    a.builder = builder({
+      docroot: __dirname,
+      path: __dirname + '/modules'
+    });
+
+    assert.equal('anon', a.dependencies()[0].id);
+  },
   testShouldWrapCommonJSModule: function() {
     var a = new asset.CommonJSModule('common');
 
