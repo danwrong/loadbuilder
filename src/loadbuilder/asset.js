@@ -8,6 +8,7 @@ var util     = require('./util'),
 var USING      = [ 'call', [ 'name', 'using' ], null ];
 var STRING_ARG = [ 'string', null ];
 var PROVIDE    = [ 'call', [ 'name', 'provide' ], null ];
+var REQUIRE    = [ 'call', [ 'name', 'require' ], [ [ 'string', null] ] ];
 
 var dependencyCache = {};
 
@@ -21,7 +22,7 @@ util.extend(Script.prototype, {
     var usings, dependencies = [];
 
     if (!dependencyCache[this.id]) {
-      usings = analyzer.analyze(USING, this.toSource());
+      usings = analyzer.analyze(USING, this.fromFile());
 
       usings.forEach(function(call) {
         var args = call.values[0];
@@ -121,7 +122,48 @@ util.extend(Module.prototype, {
   }
 });
 
+function CommonJSModule(id) {
+  this.id = id;
+}
+
+CommonJSModule.prototype = new Script;
+
+util.extend(CommonJSModule.prototype, {
+  fullPath: function() {
+    return this.builder.modPath(this.id + '.js');
+  },
+  toSource: function() {
+    if (!this._source) {
+      this._source = this.amdWrappedSource();
+    }
+
+    return this._source;
+  },
+  amdWrappedSource: function() {
+    var deps = ['require'].concat(this.dependencies().map(function(d) { return d.id; })),
+        preamble = "(function() {\nvar module=define(" + JSON.stringify(this.id) + "," +
+                   JSON.stringify(deps) + ",function(require) {\n",
+        postamble = "\n});\n})();"
+
+        return preamble + this.fromFile() + postamble;
+  },
+  dependencies: function() {
+    var requires;
+
+    if (!dependencyCache[this.id]) {
+      requires = analyzer.analyze(REQUIRE, this.fromFile());
+
+      dependencyCache[this.id] = requires.map(function(r) {
+        return this.builder.matchAsset(r.values[0]);
+      }, this);
+    }
+
+    return dependencyCache[this.id];
+  }
+});
+
 module.exports = {
   Script: Script,
-  Module: Module
+  Module: Module,
+  CommonJSModule: CommonJSModule
 };
