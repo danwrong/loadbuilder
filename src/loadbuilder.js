@@ -37,23 +37,33 @@ function isProvide(node) {
   return node[0] == 'call' && node[1] && node[1][1] == 'provide';
 }
 
+// Better typeof by Angus. See: http://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
+var toType = function(obj) {
+  return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+}
+
 function excluded(item, loadbuilder) {
-  var excluded = false;
-  loadbuilder.options.exclude.forEach(function(excl) {
-    if (typeof(excl)=='string' && excl==item) {
-      excluded = true;
-      return;
+
+  function matchExclusion (pattern, item) {
+    var i, l, match = false;
+
+    if (toType(pattern) == 'string' && pattern == item) {
+      return true;
     }
-    if (typeof(excl)=='object') {
-      excl.forEach(function(exclitem) {
-        if (exclitem == item) {
-          excluded = true;
-          return;
+    if (toType(pattern) == 'regexp' && pattern.test(item)) {
+      return true;
+    }
+    if (toType(pattern) == 'array') {
+      for (i = 0, l = pattern.length; i < l; i++) {
+        match = matchExclusion (pattern[i], item);
+        if (match) {
+          break;
         }
-      });
+      }
+      return match;
     }
-  });
-  return excluded;
+  }
+  return matchExclusion (loadbuilder.options.exclude, item);
 }
 
 
