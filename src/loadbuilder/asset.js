@@ -92,6 +92,7 @@ function Module(id) {
 }
 
 Module.prototype = new Script;
+Module.cjsMemo = {};
 
 util.extend(Module.prototype, {
   fullPath: function() {
@@ -99,10 +100,56 @@ util.extend(Module.prototype, {
   },
   toSource: function() {
     if (!this._source) {
-      this._source = this.addId(fs.readFileSync(this.fullPath(), 'utf8'));
+      if (this.isCJS()) {
+        this._source = this.amdWrappedSource();
+      } else {
+        this._source = this.addId(this.fromFile());
+      }
     }
 
     return this._source;
+  },
+  isCJS: function() {
+    if (typeof this._isCJS == 'undefined') {
+      var fileInfo = fs.statSync(this.fullPath());
+      var cjsMemoKey = fileInfo.mtime + '_' + this.fullPath();
+      if(typeof(Module.cjsMemo[cjsMemoKey]) !== 'undefined') {
+        console.log('memo', cjsMemoKey);
+        this._isCJS = Module.cjsMemo[cjsMemoKey];
+      } else {        console.log('miss', cjsMemoKey);
+        this._isCJS = Module.cjsMemo[cjsMemoKey] = !analyzer.analyze(PROVIDE, this.fromFile());
+        console.log(Module.cjsMemo);
+      }
+    }
+
+    return this._isCJS;
+  },
+  amdWrappedSource: function() {
+    console.log(this.dependencies());
+    var deps = ['require', 'exports'].concat(this.dependencies().map(function(d) { return d.id; })),
+        preamble = "(function() {\nvar module=define(" + JSON.stringify(this.id) + "," +
+                   JSON.stringify(deps) + ",function(require, exports) {\n",
+        postamble = "\n});\n})();"
+
+        return preamble + this.fromFile() + postamble;
+  },
+
+  dependencies: function() {
+    if (this.isCJS()) return this.dependenciesFromRequire();
+    else return Script.prototype.dependencies.call(this);
+  },
+  dependenciesFromRequire: function() {
+    var requires;
+
+    if (!dependencyCache[this.id]) {
+      requires = analyzer.analyze(REQUIRE, this.fromFile());
+
+      dependencyCache[this.id] = requires.map(function(r) {
+        return this.builder.matchAsset(r.values[0]);
+      }, this);
+    }
+
+    return dependencyCache[this.id];
   },
   addId: function() {
     var tree = uglify.parser.parse(this.fromFile()),
@@ -122,48 +169,7 @@ util.extend(Module.prototype, {
   }
 });
 
-function CommonJSModule(id) {
-  this.id = id;
-}
-
-CommonJSModule.prototype = new Script;
-
-util.extend(CommonJSModule.prototype, {
-  fullPath: function() {
-    return this.builder.modPath(this.id + '.js');
-  },
-  toSource: function() {
-    if (!this._source) {
-      this._source = this.amdWrappedSource();
-    }
-
-    return this._source;
-  },
-  amdWrappedSource: function() {
-    var deps = ['require'].concat(this.dependencies().map(function(d) { return d.id; })),
-        preamble = "(function() {\nvar module=define(" + JSON.stringify(this.id) + "," +
-                   JSON.stringify(deps) + ",function(require) {\n",
-        postamble = "\n});\n})();"
-
-        return preamble + this.fromFile() + postamble;
-  },
-  dependencies: function() {
-    var requires;
-
-    if (!dependencyCache[this.id]) {
-      requires = analyzer.analyze(REQUIRE, this.fromFile());
-
-      dependencyCache[this.id] = requires.map(function(r) {
-        return this.builder.matchAsset(r.values[0]);
-      }, this);
-    }
-
-    return dependencyCache[this.id];
-  }
-});
-
 module.exports = {
   Script: Script,
-  Module: Module,
-  CommonJSModule: CommonJSModule
+  Module: Module
 };

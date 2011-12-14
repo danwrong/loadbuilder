@@ -4,13 +4,19 @@ var util   = require('./util'),
     fs     = require('fs'),
     uglify = require("uglify-js");
 
-function collect(excluded, assets) {
+function collect(excluded, assets, includeDependencies) {
   var collected = [];
 
   assets.forEach(function(asset) {
+    var deps = [];
+
     if (excluded.indexOf(asset.id) < 0) {
+      if (includeDependencies) {
+        deps = asset.dependencies();
+      }
+
       collected = collected.concat(
-        collect(excluded, asset.dependencies())
+        collect(excluded, deps, includeDependencies)
       ).concat(asset);
     }
   });
@@ -43,7 +49,8 @@ function Builder(options) {
 
 Builder.default_options = {
   path: process.cwd(),
-  docroot: process.cwd()
+  docroot: process.cwd(),
+  includeDependencies: true,
 };
 
 util.extend(Builder.prototype, {
@@ -72,7 +79,7 @@ util.extend(Builder.prototype, {
     return path.join(this.options.docroot, id);
   },
   modPath: function(id) {
-    return path.join(this.options.path, id);
+    return path.join(this.options.docroot, this.options.path, id);
   },
   matchAsset: function(id) {
     var m, dep, asset;
@@ -151,7 +158,7 @@ util.extend(Builder.prototype, {
     return this;
   },
   collectedAssets: function() {
-    return dedupe(collect(this.excludes, this.assets));
+    return dedupe(collect(this.excludes, this.assets, this.options.includeDependencies));
   }
 });
 
@@ -159,6 +166,8 @@ function builder(options) {
   return new Builder(options);
 }
 
+builder.asset = asset;
+builder.analyzer = require('./analyzer');
 builder.matchers = [];
 
 builder.matchers.add = function(regex, factory) {
