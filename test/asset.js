@@ -30,7 +30,7 @@ module.exports = {
     var a = new asset.Module('anon');
     a.builder = builder({
       docroot: __dirname,
-      path: __dirname + '/modules'
+      path: '/modules'
     });
 
     assert.equal('provide("anon", function(exports) {\n    exports("hi");\n});', a.toSource());
@@ -39,7 +39,7 @@ module.exports = {
     var a = new asset.Module('named');
     a.builder = builder({
       docroot: __dirname,
-      path: __dirname + '/modules'
+      path: '/modules'
     });
 
     assert.equal('provide("shindig", function(exports) {\n    exports("hi");\n});', a.toSource());
@@ -48,29 +48,29 @@ module.exports = {
     var a = new asset.Module('has_dep');
     a.builder = builder({
       docroot: __dirname,
-      path: __dirname + '/modules'
+      path: '/modules'
     });
 
     assert.equal('anon', a.dependencies()[0].id);
   },
-  testShouldFindDependenciesForCommonJSModule: function() {
-    var a = new asset.CommonJSModule('common');
+  testShouldFindDependenciesForModule: function() {
+    var a = new asset.Module('common');
     a.builder = builder({
       docroot: __dirname,
-      path: __dirname + '/modules'
+      path: '/modules'
     });
 
     assert.equal('anon', a.dependencies()[0].id);
   },
-  testShouldWrapCommonJSModule: function() {
-    var a = new asset.CommonJSModule('common');
+  testShouldWrapModule: function() {
+    var a = new asset.Module('common');
 
     a.builder = builder({
       docroot: __dirname,
-      path: __dirname + '/modules'
+      path: '/modules'
     });
 
-    assert.equal('(function() {\nvar module=define("common",["require","anon"],' +
-                 'function(require) {\nvar a = require("anon");\n});\n})();', a.toSource());
+    assert.equal('(function() {\nvar module=define("common",["require","exports","anon"],' +
+                 'function(require, exports) {\nvar a = require("anon");\n});\n})();', a.toSource());
   }
 }

@@ -6,11 +6,13 @@ var util     = require('./util'),
     uglify   = require("uglify-js");
 
 var USING      = [ 'call', [ 'name', 'using' ], null ];
+var ARRAY_ARG = [ 'array', null ];
 var STRING_ARG = [ 'string', null ];
 var PROVIDE    = [ 'call', [ 'name', 'provide' ], null ];
 var REQUIRE    = [ 'call', [ 'name', 'require' ], [ [ 'string', null] ] ];
 
 var dependencyCache = {};
+var dependencyCacheLastUpdate = {};
 
 function Script(id) {
   this.id = id;
@@ -20,6 +22,12 @@ util.extend(Script.prototype, {
   dependencies: function() {
 
     var usings, dependencies = [];
+
+    if(dependencyCache[this.id]) {
+      //  Make sure it's not out of date
+      console.log('oodate?');
+      console.log(dependencyCache[this.id]);
+    }
 
     if (!dependencyCache[this.id]) {
       usings = analyzer.analyze(USING, this.fromFile());
@@ -33,11 +41,23 @@ util.extend(Script.prototype, {
           if (m = analyzer.match(STRING_ARG, arg)) {
              dep = this.builder.matchAsset(m[0]);
              dependencies = dependencies.concat(dep);
+          } else if(m = analyzer.match(ARRAY_ARG, arg)) {
+            arg[1].forEach(function(arg) {
+              //  FIXME: duplicate code; un-nest this stuff
+              //  nesty :(
+              var dep, m;
+
+              if (m = analyzer.match(STRING_ARG, arg)) {
+                 dep = this.builder.matchAsset(m[0]);
+                 dependencies = dependencies.concat(dep);
+              }
+            }, this);
           }
         }, this);
       }, this);
 
       dependencyCache[this.id] = dependencies;
+      dependencyCacheLastUpdate[this.id] = new Date();
     }
 
     return dependencyCache[this.id];
@@ -58,9 +78,26 @@ util.extend(Script.prototype, {
 
     return this.deferWrapper(this._source);
   },
+  preProcess: function(data) {
+    /**
+     *  Expands #define statements inside of JavaScript comments into variable declarations.
+     *
+     *  For example, this...
+     *    #define foo bar
+     *
+     *  ...will be replaced with this:
+     *    var foo = 'bar';
+     */
+    return data.replace(/\/\*\s*#define\s+([^\s]+)\s+((\n|.)+?)\*\//g, function(entireBlock, name, value) {
+      value = value.replace(/\n/g, "\\n\\\n");
+      value = value.replace(/"/g, '\\"');
+      return 'var ' + name + ' = "' + value + '";';
+    });
+  },
   fromFile: function() {
+    console.log('from file', this.id);
     if (!this._fromFile) {
-      this._fromFile = fs.readFileSync(this.fullPath(), 'utf8');
+      this._fromFile = this.preProcess(fs.readFileSync(this.fullPath(), 'utf8'));
     }
 
     return this._fromFile;
@@ -96,6 +133,10 @@ Module.cjsMemo = {};
 
 util.extend(Module.prototype, {
   fullPath: function() {
+    if(this.id.indexOf('bluejs') === 0) {
+      // FIXME: stop special casing bluejs and understand how it currently works in Monorail
+      return this.builder.modPath('../../' + this.id + '.js');
+    }
     return this.builder.modPath(this.id + '.js');
   },
   toSource: function() {
@@ -105,27 +146,27 @@ util.extend(Module.prototype, {
       } else {
         this._source = this.addId(this.fromFile());
       }
+    } else {
+      console.log("Already had source");
     }
 
     return this._source;
   },
   isCJS: function() {
     if (typeof this._isCJS == 'undefined') {
+      //  FIXME: no memoization in Loadbuilder, please.
       var fileInfo = fs.statSync(this.fullPath());
       var cjsMemoKey = fileInfo.mtime + '_' + this.fullPath();
       if(typeof(Module.cjsMemo[cjsMemoKey]) !== 'undefined') {
-        console.log('memo', cjsMemoKey);
         this._isCJS = Module.cjsMemo[cjsMemoKey];
-      } else {        console.log('miss', cjsMemoKey);
-        this._isCJS = Module.cjsMemo[cjsMemoKey] = !analyzer.analyze(PROVIDE, this.fromFile());
-        console.log(Module.cjsMemo);
+      } else {
+        this._isCJS = Module.cjsMemo[cjsMemoKey] = !analyzer.analyze(PROVIDE, this.fromFile()).length;
       }
     }
 
     return this._isCJS;
   },
   amdWrappedSource: function() {
-    console.log(this.dependencies());
     var deps = ['require', 'exports'].concat(this.dependencies().map(function(d) { return d.id; })),
         preamble = "(function() {\nvar module=define(" + JSON.stringify(this.id) + "," +
                    JSON.stringify(deps) + ",function(require, exports) {\n",
@@ -135,8 +176,14 @@ util.extend(Module.prototype, {
   },
 
   dependencies: function() {
-    if (this.isCJS()) return this.dependenciesFromRequire();
-    else return Script.prototype.dependencies.call(this);
+    if(!this._deps) {
+      if (this.isCJS()) {
+        this._deps = this.dependenciesFromRequire();
+      } else {
+        this._deps = Script.prototype.dependencies.call(this);
+      }
+    }
+    return this._deps;
   },
   dependenciesFromRequire: function() {
     var requires;
@@ -156,13 +203,18 @@ util.extend(Module.prototype, {
         provides = analyzer.analyze(PROVIDE, tree),
         provide;
 
-    if (provides.length == 1) {
+    if (provides.length > 0) {
       provide = provides[0];
 
        // TODO make this nice - maybe have a transform function?
       if (analyzer.match(STRING_ARG, provide.values[0][0]) == null) {
         provide.parent[provide.index][2].unshift(['string', this.id]);
+      } else {
+        console.log("string thing is null");
       }
+    } else {
+      console.log("provides.length is zero", provides.length);
+      console.log(JSON.stringify(provides));
     }
 
     return uglify.uglify.gen_code(tree, { beautify: true });

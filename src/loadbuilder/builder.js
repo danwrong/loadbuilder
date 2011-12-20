@@ -8,12 +8,17 @@ function collect(excluded, assets, includeDependencies) {
   var collected = [];
 
   assets.forEach(function(asset) {
+    if(!asset) {
+      console.warn('Undefined asset in assets list');
+      console.log(new Error().stack);
+      return;
+    }
     var deps = [];
-
     if (excluded.indexOf(asset.id) < 0) {
       if (includeDependencies) {
         deps = asset.dependencies();
       }
+      excluded = excluded.concat([asset.id]);
 
       collected = collected.concat(
         collect(excluded, deps, includeDependencies)
@@ -44,7 +49,8 @@ function Builder(options) {
   util.extend(this.options, Builder.default_options);
   util.extend(this.options, options || {});
   this.assets = [];
-  this.excludes = [];
+  this.excludes = this.options.excludes || [];
+  this.matchers = [];
 }
 
 Builder.default_options = {
@@ -81,12 +87,15 @@ util.extend(Builder.prototype, {
   modPath: function(id) {
     return path.join(this.options.docroot, this.options.path, id);
   },
+  addMatcher: function(regex, factory) {
+    this.matchers.push([regex, factory]);
+  },
   matchAsset: function(id) {
     var m, dep, asset;
-
-    for (var i=0, matcher; matcher = builder.matchers[i]; i++) {
+    var allMatchers = this.matchers.concat(builder.matchers);
+    for (var i=0, matcher; matcher = allMatchers[i]; i++) {
       var regex = matcher[0], factory = matcher[1];
-      if (m = id.match(regex)) {
+      if (this.excludes.indexOf(id) < 0 && (m = id.match(regex))) {
         asset = factory(id);
         asset.builder = this;
         return asset;
@@ -174,11 +183,13 @@ builder.matchers.add = function(regex, factory) {
   this.unshift([regex, factory]);
 }
 
-builder.matchers.add(/^[a-zA-Z0-9_\-\/]+$/, function(id) {
+asset.Module.regexp = /^[a-zA-Z0-9_\-\/]+$/;
+builder.matchers.add(asset.Module.regexp, function(id) {
   return new asset.Module(id);
 })
 
-builder.matchers.add(/.js$/, function(id) {
+asset.Script.regexp = /.js$/;
+builder.matchers.add(asset.Script.regexp, function(id) {
   return new asset.Script(id);
 })
 
