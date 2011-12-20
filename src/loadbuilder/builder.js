@@ -183,7 +183,7 @@ builder.matchers.add = function(regex, factory) {
   this.unshift([regex, factory]);
 }
 
-asset.Module.regexp = /^[a-zA-Z0-9_\-\/]+$/;
+asset.Module.regexp = /^\.?[a-zA-Z0-9_\-\/]+$/;
 builder.matchers.add(asset.Module.regexp, function(id) {
   return new asset.Module(id);
 })

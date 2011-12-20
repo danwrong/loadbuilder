@@ -25,7 +25,6 @@ util.extend(Script.prototype, {
 
     if(dependencyCache[this.id]) {
       //  Make sure it's not out of date
-      console.log('oodate?');
       console.log(dependencyCache[this.id]);
     }
 
@@ -95,7 +94,6 @@ util.extend(Script.prototype, {
     });
   },
   fromFile: function() {
-    console.log('from file', this.id);
     if (!this._fromFile) {
       this._fromFile = this.preProcess(fs.readFileSync(this.fullPath(), 'utf8'));
     }
