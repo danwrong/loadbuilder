@@ -51,12 +51,14 @@ function Builder(options) {
   this.assets = [];
   this.excludes = this.options.excludes || [];
   this.matchers = [];
+  this.preProcessor = options.preProcessor;
 }
 
 Builder.default_options = {
   path: process.cwd(),
   docroot: process.cwd(),
   includeDependencies: true,
+  preProcessor: null
 };
 
 util.extend(Builder.prototype, {

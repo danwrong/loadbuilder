@@ -78,20 +78,7 @@ util.extend(Script.prototype, {
     return this.deferWrapper(this._source);
   },
   preProcess: function(data) {
-    /**
-     *  Expands #define statements inside of JavaScript comments into variable declarations.
-     *
-     *  For example, this...
-     *    #define foo bar
-     *
-     *  ...will be replaced with this:
-     *    var foo = 'bar';
-     */
-    return data.replace(/\/\*\s*#define\s+([^\s]+)\s+((\n|.)+?)\*\//g, function(entireBlock, name, value) {
-      value = value.replace(/\n/g, "\\n\\\n");
-      value = value.replace(/"/g, '\\"');
-      return 'var ' + name + ' = "' + value + '";';
-    });
+    return this.builder.preProcessor ? this.builder.preProcessor(data) : data;
   },
   fromFile: function() {
     if (!this._fromFile) {
