@@ -5,7 +5,7 @@
     "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }, { "name": "Kenneth Kufluk", "email": "kenneth@kufluk.com" }],
     "homepage": "https://github.com/danwrong/loadbuilder",
     "directories" : { "lib" : "./lib" },
-    "main" : "./src/loadbuilder/builder",
+    "main" : "./lib/loadbuilder/builder",
     "engines": { "node": ">= 0.4.0" },
     "dependencies": {
       "jshint": ">=0",
