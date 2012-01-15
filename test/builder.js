@@ -57,5 +57,11 @@ module.exports = {
       assert.equal("alert('hello world');\nalert('hello world again');",fs.readFileSync(path, 'utf8'));
       fs.unlinkSync(path);
     });
+  },
+  testShouldBeAbleToSuccessFullyLoadANamedModule: function() {
+    assert.equal(
+      "provide(\"named\", function(exports) {\n    exports(\"hi\");\n});",
+      builder(opts).include('modules/named').toSource()
+    );
   }
 };

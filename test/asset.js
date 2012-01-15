@@ -42,7 +42,7 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal('provide("shindig", function(exports) {\n    exports("hi");\n});', a.toSource());
+    assert.equal('provide("named", function(exports) {\n    exports("hi");\n});', a.toSource());
   },
   testShouldFindDependenciesForModule: function() {
     var a = new asset.Module('has_dep');

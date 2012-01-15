@@ -1,3 +1,3 @@
-provide('shindig', function(exports) {
+provide('named', function(exports) {
   exports('hi');
 });
