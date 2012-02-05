@@ -32,6 +32,12 @@ module.exports = {
       builder(opts).include('fixtures/has_dep.js').toSource()
     );
   },
+  testShouldGenerateManifestList: function() {
+    assert.deepEqual(
+      ["fixtures/dep1dep.js","fixtures/dep1.js","fixtures/dep2.js","fixtures/has_dep.js"],
+      builder(opts).include('fixtures/has_dep.js').manifest()
+    );
+  },
   testShouldExcludeDependenciesOfExcludedAsset: function() {
     assert.equal(
       "alert('hello');\nusing('fixtures/dep1.js', 'fixtures/dep2.js');",
@@ -52,9 +58,11 @@ module.exports = {
     );
   },
   testShouldBeAbleToWriteToAFile: function() {
-    var path = __dirname + '/bundle.js';
-    builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function() {
+    var path = __dirname + '/bundle.js', expected = {};
+    builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function(manifest) {
       assert.equal("alert('hello world');\nalert('hello world again');",fs.readFileSync(path, 'utf8'));
+      expected[path] = ["fixtures/simple.js","fixtures/simple2.js"];
+      assert.deepEqual(expected, manifest);
       fs.unlinkSync(path);
     });
   },
