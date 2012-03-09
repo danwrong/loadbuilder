@@ -10,7 +10,7 @@
     "dependencies": {
       "jshint": ">=0",
       "opts": ">=1.2.1",
-      "uglify-js": ">=0.0.5",
+      "uglify-js": "git://github.com/kennethkufluk/UglifyJS.git#loadbuilder",
       "colors": ">=0.5.0",
       "glob": ">=3"
     },
