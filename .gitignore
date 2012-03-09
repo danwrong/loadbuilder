@@ -1,2 +1,3 @@
 test/dist
+node_modules/expresso
 .DS_Store
