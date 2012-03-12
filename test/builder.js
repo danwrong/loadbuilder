@@ -26,6 +26,12 @@ module.exports = {
       builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').exclude('fixtures/simple2.js').toSource()
     );
   },
+  testShouldBeAbleToExcludeALowLevelDep: function() {
+    assert.equal(
+      builder(opts).include('modules/mod_with_dep').exclude('modules/named').toSource(),
+      "provide(\"modules/mod_with_dep\", function(exports) {\n    using(\"modules/named\", function() {\n        exports(3);\n    });\n});"
+    );
+  },
   testShouldCollectDependencies: function() {
     assert.equal(
       "alert('hello dep1');\nusing('fixtures/dep1dep.js');\nalert('hello');\nusing('fixtures/dep1.js', 'fixtures/dep2.js');",
