@@ -63,6 +63,12 @@ module.exports = {
       builder(opts).include('fixtures/has_dep.js').exclude(a).toSource()
     );
   },
+  testShouldBeAbleToExcludeABundleWithoutBreakingCommonJS: function() {
+    assert.equal(
+      "(function() {\nvar module=define(\"modules/bananas\",[\"require\",\"exports\",\"modules/anon\"],function(require, exports) {\nvar a = require('modules/anon');\n});\n})();",
+      builder(opts).include('modules/bananas').exclude('modules/anon').toSource()
+    );
+  },
   testShouldBeAbleToWriteToAFile: function() {
     var path = __dirname + '/bundle.js', expected = {};
     builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function(manifest) {
