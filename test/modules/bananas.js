@@ -1,1 +1,1 @@
-var a = require('modules/anon');
+var a = require('anon');

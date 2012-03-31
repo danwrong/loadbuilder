@@ -1,3 +1,5 @@
-using('anon', function(a) {
-  alert(a);
+provide(function(exports) {
+  using('anon', function(a) {
+    alert(a);
+  });
 });

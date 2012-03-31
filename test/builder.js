@@ -4,7 +4,8 @@ var builder = require('loadbuilder/builder'),
     fs      = require('fs');
 
 var opts = {
-  docroot: __dirname
+  docroot: __dirname,
+  path: 'modules'
 };
 
 module.exports = {
@@ -28,8 +29,8 @@ module.exports = {
   },
   testShouldBeAbleToExcludeALowLevelDep: function() {
     assert.equal(
-      builder(opts).include('modules/mod_with_dep').exclude('modules/named').toSource(),
-      "provide(\"modules/mod_with_dep\", function(exports) {\n    using(\"modules/named\", function() {\n        exports(3);\n    });\n});"
+      builder(opts).include('mod_with_dep').exclude('named').toSource(),
+      "provide(\"mod_with_dep\", function(exports) {\n    using(\"named\", function() {\n        exports(3);\n    });\n});"
     );
   },
   testShouldCollectDependencies: function() {
@@ -65,8 +66,8 @@ module.exports = {
   },
   testShouldBeAbleToExcludeABundleWithoutBreakingCommonJS: function() {
     assert.equal(
-      "(function() {\nvar module=define(\"modules/bananas\",[\"require\",\"exports\",\"modules/anon\"],function(require, exports) {\nvar a = require('modules/anon');\n});\n})();",
-      builder(opts).include('modules/bananas').exclude('modules/anon').toSource()
+      "(function() {\nvar module=define(\"bananas\",[\"require\",\"exports\",\"anon\"],function(require, exports) {\nvar a = require('anon');\n});\n})();",
+      builder(opts).include('bananas').exclude('anon').toSource()
     );
   },
   testShouldBeAbleToWriteToAFile: function() {
@@ -81,7 +82,7 @@ module.exports = {
   testShouldBeAbleToSuccessFullyLoadANamedModule: function() {
     assert.equal(
       "provide(\"named\", function(exports) {\n    exports(\"hi\");\n});",
-      builder(opts).include('modules/named').toSource()
+      builder(opts).include('named').toSource()
     );
   }
 };

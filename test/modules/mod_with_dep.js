@@ -1,5 +1,5 @@
 provide(function(exports) {
-  using('modules/named', function() {
+  using('named', function() {
     exports(3);
   });
 });
