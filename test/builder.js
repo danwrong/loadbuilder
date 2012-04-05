@@ -58,10 +58,19 @@ module.exports = {
     );
   },
   testShouldBeAbleToExcludeABundle: function() {
-    var a = builder(opts).include('fixtures/dep1.js', 'fixtures/dep2.js');
+    var a = builder(opts).include('fixtures/dep1.js', 'fixtures/dep2.js'),
+        result = builder(opts).include('fixtures/has_dep.js').exclude(a).toSource();
     assert.equal(
       "using('fixtures/dep1.js', 'fixtures/dep2.js');",
-      builder(opts).include('fixtures/has_dep.js').exclude(a).toSource()
+      result
+    );
+  },
+  testShouldBeAbleToExcludeADeepDep: function() {
+    var a = builder(opts).include('mod_with_dep'),
+        result = builder(opts).include('mod_with_same_dep').exclude(a).toSource();
+    assert.equal(
+      "provide(\"mod_with_same_dep\", function(exports) {\n    using(\"named\", function() {\n        exports(3);\n    });\n});",
+      result
     );
   },
   testShouldBeAbleToExcludeABundleWithoutBreakingCommonJS: function() {
