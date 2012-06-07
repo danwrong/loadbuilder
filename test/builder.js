@@ -75,7 +75,7 @@ module.exports = {
   },
   testShouldBeAbleToExcludeABundleWithoutBreakingCommonJS: function() {
     assert.equal(
-      "(function() {\nvar module=define(\"bananas\",[\"require\",\"exports\",\"anon\"],function(require, exports) {\nvar a = require('anon');\n});\n})();",
+      "define(\"bananas\",[\"module\",\"require\",\"exports\",\"anon\"],function(module, require, exports) {\nvar a = require('anon');\n});",
       builder(opts).include('bananas').exclude('anon').toSource()
     );
   },
