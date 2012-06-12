@@ -30,7 +30,7 @@ module.exports = {
   testShouldBeAbleToExcludeALowLevelDep: function() {
     assert.equal(
       builder(opts).include('mod_with_dep').exclude('named').toSource(),
-      "provide(\"mod_with_dep\", function(exports) {\n    using(\"named\", function() {\n        exports(3);\n    });\n});"
+      "provide('mod_with_dep', function (exports) {\n    using('named', function () {\n        exports(3);\n    });\n});"
     );
   },
   testShouldCollectDependencies: function() {
@@ -69,7 +69,7 @@ module.exports = {
     var a = builder(opts).include('mod_with_dep'),
         result = builder(opts).include('mod_with_same_dep').exclude(a).toSource();
     assert.equal(
-      "provide(\"mod_with_same_dep\", function(exports) {\n    using(\"named\", function() {\n        exports(3);\n    });\n});",
+      "provide('mod_with_same_dep', function (exports) {\n    using('named', function () {\n        exports(3);\n    });\n});",
       result
     );
   },
@@ -90,7 +90,7 @@ module.exports = {
   },
   testShouldBeAbleToSuccessFullyLoadANamedModule: function() {
     assert.equal(
-      "provide(\"named\", function(exports) {\n    exports(\"hi\");\n});",
+      "provide('named', function (exports) {\n    exports('hi');\n});",
       builder(opts).include('named').toSource()
     );
   }
