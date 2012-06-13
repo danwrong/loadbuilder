@@ -1,6 +1,6 @@
 {
     "name": "loadbuilder",
-    "version": "0.2.12",
+    "version": "0.3.0",
     "description": "Combine and compress dependency chains created by Loadrunner",
     "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }, { "name": "Kenneth Kufluk", "email": "kenneth@kufluk.com" }],
     "homepage": "https://github.com/danwrong/loadbuilder",
@@ -8,6 +8,8 @@
     "main" : "./lib/loadbuilder/builder",
     "engines": { "node": ">= 0.4.0" },
     "dependencies": {
+      "esprima": "0.9.9",
+      "escodegen": "0.0.4",
       "jshint": "0.5.9",
       "opts": "1.2.2",
       "uglify-js": "git://github.com/kennethkufluk/UglifyJS.git#loadbuilder",
