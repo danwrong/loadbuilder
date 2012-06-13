@@ -41,7 +41,7 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal("provide('named', function (exports) {\n    exports('hi');\n});", a.toSource());
+    assert.equal("/*! license */\nprovide('named', function (exports) {\n    exports('hi');\n});", a.toSource());
   },
   testShouldFindDependenciesForModule: function() {
     var a = new asset.Module('has_dep');

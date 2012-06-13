@@ -9,7 +9,7 @@
     "engines": { "node": ">= 0.4.0" },
     "dependencies": {
       "esprima": "0.9.9",
-      "escodegen": "0.0.2",
+      "escodegen": "0.0.4",
       "jshint": "0.5.9",
       "opts": "1.2.2",
       "uglify-js": "git://github.com/kennethkufluk/UglifyJS.git#loadbuilder",

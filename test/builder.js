@@ -90,7 +90,7 @@ module.exports = {
   },
   testShouldBeAbleToSuccessFullyLoadANamedModule: function() {
     assert.equal(
-      "provide('named', function (exports) {\n    exports('hi');\n});",
+      "/*! license */\nprovide('named', function (exports) {\n    exports('hi');\n});",
       builder(opts).include('named').toSource()
     );
   }
