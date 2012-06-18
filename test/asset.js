@@ -18,13 +18,12 @@ module.exports = {
     });
     assert.equal("deferred('fixtures/simple.js', function() {\nalert('hello world');\n});", a.toSource());
   },
-  testShouldFindDependenciesForModule: function() {
+  testShouldFindDependenciesForScript: function() {
     var a = new asset.Script('fixtures/dep1.js');
     a.builder = builder({
       docroot: __dirname
     });
-
-    assert.equal('dep1dep', a.dependencies()[0].id);
+    assert.equal('fixtures/dep1dep.js', a.dependencies()[0].id);
   },
   testShouldAddNameToAnonModule: function() {
     var a = new asset.Module('anon');
@@ -33,7 +32,7 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal('provide("anon", function(exports) {\n    exports("hi");\n});', a.toSource());
+    assert.equal("provide('anon', function (exports) {\n    exports('hi');\n});", a.toSource());
   },
   testShouldNotAddNameToNamedModule: function() {
     var a = new asset.Module('named');
@@ -42,7 +41,7 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal('provide("named", function(exports) {\n    exports("hi");\n});', a.toSource());
+    assert.equal("/*! license */\nprovide('named', function (exports) {\n    exports('hi');\n});", a.toSource());
   },
   testShouldFindDependenciesForModule: function() {
     var a = new asset.Module('has_dep');
@@ -53,7 +52,7 @@ module.exports = {
 
     assert.equal('anon', a.dependencies()[0].id);
   },
-  testShouldFindDependenciesForModule: function() {
+  testShouldFindDependenciesForModule2: function() {
     var a = new asset.Module('common');
     a.builder = builder({
       docroot: __dirname,
@@ -71,6 +70,6 @@ module.exports = {
     });
 
     assert.equal('define("common",["module","require","exports","anon"],' +
-                 'function(module, require, exports) {\nvar a = require("anon");\n});', a.toSource());
+                 'function(module, require, exports) {\nvar a = require(\'anon\');\n});', a.toSource());
   }
 }
