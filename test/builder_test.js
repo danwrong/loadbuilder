@@ -39,6 +39,13 @@ module.exports = {
       builder(opts).include('fixtures/has_dep.js').toSource()
     );
   },
+  testShouldCollectAMDDependencies: function() {
+    var expected = "define('subfolder/amd_dep', [\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});\ndefine(\"../fixtures/dep1\",[\"module\",\"require\",\"exports\"],function(module, require, exports) {\nusing('fixtures/dep1dep.js');\n});\ndefine('subfolder/amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+    assert.equal(
+      expected,
+      builder(opts).include('subfolder/amd').toSource()
+    );
+  },
   testShouldGenerateManifestList: function() {
     assert.deepEqual(
       ["fixtures/dep1dep.js","fixtures/dep1.js","fixtures/dep2.js","fixtures/has_dep.js"],
