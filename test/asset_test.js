@@ -71,5 +71,28 @@ module.exports = {
 
     assert.equal('define("common",["module","require","exports","anon"],' +
                  'function(module, require, exports) {\nvar a = require(\'anon\');\n});', a.toSource());
+  },
+  testShouldNotWrapAMDModule: function() {
+    var a = new asset.Module('subfolder/amd');
+
+    a.builder = builder({
+      docroot: __dirname,
+      path: '/modules'
+    });
+
+    assert.equal("define('subfolder/amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], " +
+      "function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});",
+      a.toSource());
+  },
+  testShouldAddNameAMDModule: function() {
+    var a = new asset.Module('subfolder/amd_anon');
+
+    a.builder = builder({
+      docroot: __dirname,
+      path: '/modules'
+    });
+
+    assert.equal("define('subfolder/amd_anon', [\n    './common'\n], function (common) {\n    return common;\n});",
+      a.toSource());
   }
 }
