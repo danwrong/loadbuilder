@@ -41,7 +41,8 @@ module.exports = {
     );
   },
   testShouldCollectAMDDependencies: function() {
-    var expected = "define('subfolder/amd_dep', [\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});\ndefine(\"../fixtures/dep1\",[\"module\",\"require\",\"exports\"],function(module, require, exports) {\nusing('fixtures/dep1dep.js');\n});\ndefine('subfolder/amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+    var expected = "define('subfolder/amd_dep', [\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});\ndefine(\"../fixtures/dep1\",[\"module\",\"require\",\"exports\"],function(module, require, exports) {\nusing('fixtures/dep1dep.js');\n});\ndefine('amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+
     assert.equal(
       expected,
       builder(opts).include('subfolder/amd').toSource()
