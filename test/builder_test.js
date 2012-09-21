@@ -5,7 +5,8 @@ var builder = require('loadbuilder/builder'),
 
 var opts = {
   docroot: __dirname,
-  path: 'modules'
+  path: 'modules',
+  hashSalt: '7'
 };
 
 module.exports = {
@@ -40,7 +41,8 @@ module.exports = {
     );
   },
   testShouldCollectAMDDependencies: function() {
-    var expected = "define('subfolder/amd_dep', [\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});\ndefine(\"../fixtures/dep1\",[\"module\",\"require\",\"exports\"],function(module, require, exports) {\nusing('fixtures/dep1dep.js');\n});\ndefine('subfolder/amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+    var expected = "define('subfolder/amd_dep', [\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});\ndefine(\"../fixtures/dep1\",[\"module\",\"require\",\"exports\"],function(module, require, exports) {\nusing('fixtures/dep1dep.js');\n});\ndefine('amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+
     assert.equal(
       expected,
       builder(opts).include('subfolder/amd').toSource()
@@ -100,5 +102,16 @@ module.exports = {
       "/*! license */\nprovide('named', function (exports) {\n    exports('hi');\n});",
       builder(opts).include('named').toSource()
     );
+  },
+  testShouldBeAbleToWriteToAHashedFile: function() {
+    var path = __dirname + '/bundle-<hash>.js',
+        expectedPath = __dirname + '/bundle-ab216526b0744b96626d41a61c0fd372baf79a9e.js',
+        expected = {};
+    builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function(manifest) {
+      assert.equal("alert('hello world');\nalert('hello world again');",fs.readFileSync(expectedPath, 'utf8'));
+      expected[expectedPath] = ["fixtures/simple.js","fixtures/simple2.js"];
+      assert.deepEqual(expected, manifest);
+      fs.unlinkSync(expectedPath);
+    });
   }
 };

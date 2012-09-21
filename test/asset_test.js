@@ -80,8 +80,10 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal("define('subfolder/amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], " +
-      "function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});",
+    var expectedResult = "define('amd', [\n    './amd_dep',\n    '../../fixtures/dep1',\n    'module',\n    'require',\n    'exports'\n], " +
+      "function (common, dep1, module, require, exports) {\n    var a = require('./common');\n    return a;\n});";
+
+    assert.equal(expectedResult,
       a.toSource());
   },
   testShouldAddNameAMDModule: function() {
@@ -92,7 +94,9 @@ module.exports = {
       path: '/modules'
     });
 
-    assert.equal("define('subfolder/amd_anon', [\n    './common'\n], function (common) {\n    return common;\n});",
+    var expectedResult = "define('subfolder/amd_anon', [\n    './common'\n], function (common) {\n    return common;\n});";
+
+    assert.equal(expectedResult,
       a.toSource());
   }
 }
