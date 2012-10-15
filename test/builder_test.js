@@ -113,5 +113,29 @@ module.exports = {
       assert.deepEqual(expected, manifest);
       fs.unlinkSync(expectedPath);
     });
+  },
+  testAlias: function() {
+    var dir = __dirname;
+    var expected = "alert('hello');\nusing('fixtures/dep1dep.js');";
+    var result = builder(opts)
+      .include('fixtures/dep1.js')
+      .alias({
+        'fixtures/dep1dep.js': 'fixtures/dep2.js'
+      })
+      .toSource();
+    assert.equal(expected, result);
+  },
+  testAliasesOption: function() {
+    var dir = __dirname;
+    var expected = "alert('hello');\nusing('fixtures/dep1dep.js');";
+    var newOpts = [];
+    for (prop in opts) newOpts[prop] = opts[prop];
+    newOpts.aliases = {
+      'fixtures/dep1dep.js': 'fixtures/dep2.js'
+    };
+    var result = builder(newOpts)
+      .include('fixtures/dep1.js')
+      .toSource();
+    assert.equal(expected, result);
   }
 };
