@@ -114,28 +114,21 @@ module.exports = {
       fs.unlinkSync(expectedPath);
     });
   },
-  testAlias: function() {
-    var dir = __dirname;
-    var expected = "alert('hello');\nusing('fixtures/dep1dep.js');";
-    var result = builder(opts)
-      .include('fixtures/dep1.js')
-      .alias({
-        'fixtures/dep1dep.js': 'fixtures/dep2.js'
-      })
-      .toSource();
-    assert.equal(expected, result);
-  },
-  testAliasesOption: function() {
-    var dir = __dirname;
-    var expected = "alert('hello');\nusing('fixtures/dep1dep.js');";
-    var newOpts = [];
-    for (prop in opts) newOpts[prop] = opts[prop];
-    newOpts.aliases = {
-      'fixtures/dep1dep.js': 'fixtures/dep2.js'
+  testShouldBeAbleToInjectCode: function() {
+    var path = __dirname + '/bundle-inject.js', expected = {};
+    var opts = {
+      docroot: __dirname,
+      path: 'modules',
+      hashSalt: '8',
+      postProcess: function(source) {
+        return source + 'injected';
+      }
     };
-    var result = builder(newOpts)
-      .include('fixtures/dep1.js')
-      .toSource();
-    assert.equal(expected, result);
-  }
+    builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function(manifest) {
+      assert.equal("alert('hello world');\nalert('hello world again');injected",fs.readFileSync(path, 'utf8'));
+      expected[path] = ["fixtures/simple.js","fixtures/simple2.js"];
+      assert.deepEqual(expected, manifest);
+      fs.unlinkSync(path);
+    });
+  },
 };
