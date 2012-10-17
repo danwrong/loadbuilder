@@ -113,5 +113,22 @@ module.exports = {
       assert.deepEqual(expected, manifest);
       fs.unlinkSync(expectedPath);
     });
-  }
+  },
+  testShouldBeAbleToInjectCode: function() {
+    var path = __dirname + '/bundle-inject.js', expected = {};
+    var opts = {
+      docroot: __dirname,
+      path: 'modules',
+      hashSalt: '8',
+      postProcess: function(source) {
+        return source + 'injected';
+      }
+    };
+    builder(opts).include('fixtures/simple.js', 'fixtures/simple2.js').write(path, function(manifest) {
+      assert.equal("alert('hello world');\nalert('hello world again');injected",fs.readFileSync(path, 'utf8'));
+      expected[path] = ["fixtures/simple.js","fixtures/simple2.js"];
+      assert.deepEqual(expected, manifest);
+      fs.unlinkSync(path);
+    });
+  },
 };
