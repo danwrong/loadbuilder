@@ -94,8 +94,7 @@ module.exports = {
       path: '/modules'
     });
 
-    var expectedResult = "define('subfolder/amd_anon', [\n    './common'\n], function (common) {\n    return common;\n});";
-
+    var expectedResult = "define('subfolder/amd_anon', ['./common'], function (common) {\n    return common;\n});";
     assert.equal(expectedResult,
       a.toSource());
   }
