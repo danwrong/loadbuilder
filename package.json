@@ -1,6 +1,6 @@
 {
     "name": "loadbuilder",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "Combine and compress dependency chains created by Loadrunner",
     "contributors": [{ "name": "Dan Webb", "email": "dan@danwebb.net" }, { "name": "Kenneth Kufluk", "email": "kenneth@kufluk.com" }],
     "homepage": "https://github.com/danwrong/loadbuilder",
