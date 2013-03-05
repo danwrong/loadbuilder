@@ -131,8 +131,22 @@ module.exports = {
       fs.unlinkSync(path);
     });
   },
+  testDONTStripUseStrict: function() {
+    var expected = '"use strict",provide("strict",function(a){function b(){"use strict"}a()})';
+    var result = builder(opts).include('strict').minify().toSource();
+    assert.equal(
+      expected,
+      result
+    );
+  },
   testStripUseStrict: function() {
     // "use strict" is only stripped from modules, not scripts
+    var opts = {
+      docroot: __dirname,
+      path: 'modules',
+      hashSalt: '7',
+      stripUseStrict: true
+    };
     var expected = 'provide("strict",function(a){function b(){"use strict"}a()})';
     var result = builder(opts).include('strict').minify().toSource();
     assert.equal(
