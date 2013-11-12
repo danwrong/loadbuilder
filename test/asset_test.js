@@ -1,5 +1,5 @@
-var builder = require('loadbuilder/builder'),
-    asset   = require('loadbuilder/asset'),
+var builder = require('../lib/loadbuilder/builder'),
+    asset   = require('../lib/loadbuilder/asset'),
     assert  = require('assert');
 
 module.exports = {
