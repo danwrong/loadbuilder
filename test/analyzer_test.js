@@ -1,4 +1,4 @@
-var analyzer = require('loadbuilder/analyzer'),
+var analyzer = require('../lib/loadbuilder/analyzer'),
     assert   = require('assert');
 
 var tree = {
