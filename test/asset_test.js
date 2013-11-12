@@ -97,5 +97,16 @@ module.exports = {
     var expectedResult = "define('subfolder/amd_anon', ['./common'], function (common) {\n    return common;\n});";
     assert.equal(expectedResult,
       a.toSource());
+  },
+  testShouldHandleOmittedDependenciesAMDModule: function () {
+    var a = new asset.Module('subfolder/amd_nodep');
+
+    a.builder = builder({
+      docroot: __dirname,
+      path: '/modules'
+    });
+
+    var expectedResult = "define('subfolder/amd_nodep', function () {\n    return true;\n});";
+    assert.equal(expectedResult, a.toSource());
   }
 }
