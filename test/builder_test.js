@@ -54,6 +54,23 @@ module.exports = {
       builder(opts).include('fixtures/has_dep.js').manifest()
     );
   },
+  testShouldExcludeFromManifestList: function() {
+    var opts = {
+      docroot: __dirname,
+      path: 'modules',
+      hashSalt: '7',
+      includeInManifest: false
+    };
+    var path = __dirname + '/bundle-no-manifest.js';
+    // Manifest is only excluded in callback from write
+    builder(opts).include('fixtures/has_dep.js').write(path, function(manifest) {
+      assert.deepEqual(
+        {},
+        manifest
+      );
+      fs.unlinkSync(path);
+    });
+  },
   testShouldExcludeDependenciesOfExcludedAsset: function() {
     assert.equal(
       "alert('hello');\nusing('fixtures/dep1.js', 'fixtures/dep2.js');",
